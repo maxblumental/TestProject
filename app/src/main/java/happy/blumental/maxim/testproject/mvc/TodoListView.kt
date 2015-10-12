@@ -1,9 +1,9 @@
 package happy.blumental.maxim.testproject.mvc
 
 import android.support.v7.app.AlertDialog
-import android.view.*
+import android.view.LayoutInflater
 import android.view.View
-import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -15,12 +15,9 @@ import happy.blumental.maxim.testproject.bind
 import happy.blumental.maxim.testproject.data.Event
 import happy.blumental.maxim.testproject.data.TodoItem
 import happy.blumental.maxim.testproject.mainThread
-import happy.blumental.maxim.testproject.mvc.TodoListModel
-import rx.Observable
 import rx.lang.kotlin.PublishSubject
 import java.util.*
 import java.util.concurrent.TimeUnit
-import happy.blumental.maxim.testproject.mvc
 
 class TodoListView(val layout: View, model: TodoListModel) {
 
@@ -90,7 +87,7 @@ class TodoListView(val layout: View, model: TodoListModel) {
         val checkBox = itemView.findViewById(R.id.checkbox) as CheckBox
         checkBox.text = item.title
         checkBox.isChecked = item.checked
-        checkBox.checkedChanges().subscribe {
+        checkBox.checkedChanges().skip(1).subscribe {
             item.checked = it
             itemClicksSubject.onNext(item)
         }
@@ -120,8 +117,7 @@ class TodoListView(val layout: View, model: TodoListModel) {
         val customView = inflater.inflate(R.layout.create_item_dialog, null)
         val editText = customView.findViewById(R.id.dialogEditText) as EditText
 
-        alertDialog.setMessage("Do you really want to delete checked items?")
-                .setTitle("Add a new task")
+        alertDialog.setTitle("Add a new task")
                 .setView(customView)
                 .setCancelable(true)
                 .setPositiveButton("Add", { dialog, which -> addNewItemSubject.onNext(editText.text.toString()) })
