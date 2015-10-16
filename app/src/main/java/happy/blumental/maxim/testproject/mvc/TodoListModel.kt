@@ -1,20 +1,18 @@
 package happy.blumental.maxim.testproject.mvc
 
-import happy.blumental.maxim.testproject.bind
 import happy.blumental.maxim.testproject.data.Event
-import happy.blumental.maxim.testproject.mvc.TodoListView
+import happy.blumental.maxim.testproject.data.PTodoItem
 import happy.blumental.maxim.testproject.data.TodoItem
 import happy.blumental.maxim.testproject.mainThread
 import happy.blumental.maxim.testproject.plusAssign
+import happy.blumental.maxim.testproject.sync
 import rx.Observable
-import rx.lang.kotlin.BehaviourSubject
 import rx.lang.kotlin.PublishSubject
 import rx.lang.kotlin.toObservable
 import rx.lang.kotlin.toSingletonObservable
 import rx.subscriptions.CompositeSubscription
 import java.util.*
 import java.util.concurrent.TimeUnit
-import happy.blumental.maxim.testproject.mvc.*
 
 interface TodoListModel {
     fun uiUpdates(): Observable<Event>
@@ -25,6 +23,7 @@ class TodoListModelImpl() : TodoListModel {
     private val updateUISubject = PublishSubject<Event>()
 
     private val items = LinkedHashMap<TodoItem, Event.Status>()
+    private val parseItems = HashMap<String, PTodoItem>()
 
     init {
         updateUISubject.filter { it.status == Event.Status.PROGRESS }
@@ -53,9 +52,11 @@ class TodoListModelImpl() : TodoListModel {
     private fun subscribeView(view: TodoListView) {
         subscription += view.addNewItemSubject
                 .mainThread()
-                .flatMap {
-                    val item = TodoItem(UUID.randomUUID().toString(), it, false)
-                    Event(item, Event.Status.COMPLETED).toSingletonObservable()
+                .map {
+                    val parseItem = PTodoItem(it, false)
+                    val item = TodoItem(parseItem.sync().objectId, it, false)
+                    parseItems.put(parseItem.objectId, parseItem)
+                    Event(item, Event.Status.COMPLETED)
                 }
                 .subscribe {
                     items[it.todoItem] = it.status
@@ -65,7 +66,12 @@ class TodoListModelImpl() : TodoListModel {
         subscription += view.itemClicksSubject
                 .mainThread()
                 .debounce(200, TimeUnit.MILLISECONDS)
-                .map { Event(it, Event.Status.PROGRESS) }
+                .map {
+                    val parseItem : PTodoItem? = parseItems.get(it.id)
+                    parseItem?.isDone = it.checked
+                    parseItem?.sync()
+                    Event(it, Event.Status.COMPLETED)
+                }
                 .subscribe {
                     updateUISubject.onNext(it)
                 }
@@ -79,6 +85,7 @@ class TodoListModelImpl() : TodoListModel {
                 }
                 .subscribe {
                     items.remove(it.todoItem)
+                    parseItems.get(it.todoItem.id)?.delete()
                     updateUISubject.onNext(it)
                 }
     }

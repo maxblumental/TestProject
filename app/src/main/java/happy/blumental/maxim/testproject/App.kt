@@ -10,7 +10,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-      //  ParseObject.registerSubclass(PTodoItem::class.java)
-      //  Parse.initialize(this, BuildConfig.PARSE_APP_ID, BuildConfig.PARSE_CLIENT_KEY)
+        ParseObject.registerSubclass(PTodoItem::class.java)
+        Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_key))
     }
 }
