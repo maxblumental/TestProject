@@ -18,7 +18,7 @@
             android:name="com.parse.CLIENT_KEY"
             android:value="@string/parse_client_key" />
         <activity
-            android:name=".MainActivity"
+            android:name=".mvc.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

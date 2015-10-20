@@ -87,7 +87,10 @@ class TodoListView(val layout: View, model: TodoListModel) {
         val checkBox = itemView.findViewById(R.id.checkbox) as CheckBox
         checkBox.text = item.title
         checkBox.isChecked = item.checked
-        checkBox.checkedChanges().skip(1).subscribe {
+        checkBox.checkedChanges().skip(1)
+                .mainThread()
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .subscribe {
             item.checked = it
             itemClicksSubject.onNext(item)
         }

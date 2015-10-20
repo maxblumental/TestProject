@@ -63,19 +63,6 @@ class TodoListModelImpl() : TodoListModel {
                     updateUISubject.onNext(it)
                 }
 
-        subscription += view.itemClicksSubject
-                .mainThread()
-                .debounce(200, TimeUnit.MILLISECONDS)
-                .map {
-                    val parseItem : PTodoItem? = parseItems.get(it.id)
-                    parseItem?.isDone = it.checked
-                    parseItem?.sync()
-                    Event(it, Event.Status.COMPLETED)
-                }
-                .subscribe {
-                    updateUISubject.onNext(it)
-                }
-
         subscription += view.removeCheckedSubject
                 .mainThread()
                 .flatMap {
@@ -86,6 +73,19 @@ class TodoListModelImpl() : TodoListModel {
                 .subscribe {
                     items.remove(it.todoItem)
                     parseItems.get(it.todoItem.id)?.delete()
+                    updateUISubject.onNext(it)
+                }
+
+        subscription += view.itemClicksSubject
+                .debounce(1000, TimeUnit.MILLISECONDS)
+                .mainThread()
+                .map {
+                    val parseItem: PTodoItem? = parseItems.get(it.id)
+                    parseItem?.isDone = it.checked
+                    parseItem?.sync()
+                    Event(it, Event.Status.COMPLETED)
+                }
+                .subscribe {
                     updateUISubject.onNext(it)
                 }
     }
