@@ -3,6 +3,8 @@ package happy.blumental.maxim.testproject
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.RelativeLayout
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity
 import happy.blumental.maxim.testproject.mvc.TodoListModelImpl
 import happy.blumental.maxim.testproject.mvc.TodoListView
@@ -22,13 +24,15 @@ public class MainActivity : RxAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        todoListView = TodoListView(findViewById(R.id.content), model, menuClicks.filter { it == R.id.action_refresh })
+
         if (savedInstanceState == null) {
             // load data from parse
+            model.refresh()
         } else {
             // load data from bundle
         }
 
-        todoListView = TodoListView(findViewById(R.id.content), model)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -40,7 +44,7 @@ public class MainActivity : RxAppCompatActivity() {
         val id = item.itemId
 
         return when (id) {
-            R.id.action_settings -> {
+            R.id.action_refresh -> {
                 menuClicks.onNext(id)
                 true
             }

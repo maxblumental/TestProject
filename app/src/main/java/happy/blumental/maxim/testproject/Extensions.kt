@@ -10,20 +10,15 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
+import java.util.*
 
-fun CompositeSubscription.plusAssign(s: Subscription) = add(s)
+operator fun CompositeSubscription.plusAssign(s: Subscription) = add(s)
 
 fun ViewGroup.getChildren(): List<View> {
-    val children = arrayListOf<View>()
+    val children = ArrayList<View>()
     for (i in 0..childCount-1)
-        children += getChildAt(i)
+        children.add(getChildAt(i))
     return children
-}
-
-fun ParseObject.sync() : ParseObject {
-    this.save()
-    this.fetch<PTodoItem>()
-    return this
 }
 
 fun <T> Observable<T>.bind(activity: RxAppCompatActivity) = compose(activity.bindToLifecycle<T>())

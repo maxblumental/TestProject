@@ -15,17 +15,20 @@ import happy.blumental.maxim.testproject.bind
 import happy.blumental.maxim.testproject.data.Event
 import happy.blumental.maxim.testproject.data.TodoItem
 import happy.blumental.maxim.testproject.mainThread
+import rx.Observable
 import rx.lang.kotlin.PublishSubject
+import rx.lang.kotlin.onError
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class TodoListView(val layout: View, model: TodoListModel) {
+class TodoListView(val layout: View, model: TodoListModel, private val refreshes: Observable<Int>) {
 
     private val addButton = layout.findViewById(R.id.button_add) as Button
     private val clearCheckedButton = layout.findViewById(R.id.button_clear_checked)
     private val itemsView = layout.findViewById(R.id.items) as ViewGroup
     private val context = layout.context
     private val inflater = LayoutInflater.from(context)
+    private val progress = layout.findViewById(R.id.progress_indication)
     private val itemToView = HashMap<TodoItem, View>()
 
     val itemClicksSubject = PublishSubject<TodoItem>()
@@ -33,6 +36,13 @@ class TodoListView(val layout: View, model: TodoListModel) {
     val addNewItemSubject = PublishSubject<String>()
 
     init {
+        model.stateUpdates()
+                .mainThread()
+                .bind(layout)
+                .subscribe {
+                    progress.visibility = if (it) View.GONE  else View.VISIBLE
+                }
+
         model.uiUpdates()
                 .mainThread()
                 .bind(layout)
@@ -71,6 +81,7 @@ class TodoListView(val layout: View, model: TodoListModel) {
         when (event.status) {
             Event.Status.PROGRESS -> {
                 presentItem.isEnabled = false
+
             }
             Event.Status.COMPLETED -> {
                 presentItem.isEnabled = true
@@ -91,14 +102,15 @@ class TodoListView(val layout: View, model: TodoListModel) {
                 .mainThread()
                 .debounce(500, TimeUnit.MILLISECONDS)
                 .subscribe {
-            item.checked = it
-            itemClicksSubject.onNext(item)
-        }
+                    item.checked = it
+                    itemClicksSubject.onNext(item)
+                }
         return itemView
     }
 
     fun addButtonClicks() = addButton.clicks()
     fun clearCheckedButtonClicks() = clearCheckedButton.clicks()
+    fun refreshes() = refreshes
 
     private fun showRemoveItemsDialog() {
 
