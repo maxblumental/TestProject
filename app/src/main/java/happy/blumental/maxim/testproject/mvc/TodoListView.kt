@@ -1,5 +1,6 @@
 package happy.blumental.maxim.testproject.mvc
 
+import android.app.Activity
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +21,7 @@ import rx.lang.kotlin.PublishSubject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class TodoListView(val layout: View, model: TodoListModel, private val refreshes: Observable<Int>) {
+class TodoListView(val activity: Activity, val layout: View, model: TodoListModel, private val refreshes: Observable<Int>) {
 
     private val addButton = layout.findViewById(R.id.button_add) as Button
     private val clearCheckedButton = layout.findViewById(R.id.button_clear_checked)
@@ -113,6 +114,8 @@ class TodoListView(val layout: View, model: TodoListModel, private val refreshes
 
     private fun showRemoveItemsDialog() {
 
+        NetworkManager.checkInternetConnection(activity)
+
         val alertDialog = AlertDialog.Builder(this.context)
 
         alertDialog.setMessage("Do you really want to delete checked items?")
@@ -127,6 +130,8 @@ class TodoListView(val layout: View, model: TodoListModel, private val refreshes
 
     private fun showCreateTaskDialog() {
 
+        NetworkManager.checkInternetConnection(activity)
+
         val alertDialog = AlertDialog.Builder(this.context)
         val customView = inflater.inflate(R.layout.create_item_dialog, null)
         val editText = customView.findViewById(R.id.dialogEditText) as EditText
@@ -134,7 +139,7 @@ class TodoListView(val layout: View, model: TodoListModel, private val refreshes
         alertDialog.setTitle("Add a new task")
                 .setView(customView)
                 .setCancelable(true)
-                .setPositiveButton("Add", { dialog, which -> addNewItemSubject.onNext(editText.text.toString()) })
+                .setPositiveButton("Add", { dialog, which -> addNewItemSubject.onNext(editText.text.toString())})
                 .setNegativeButton("Cancel", { dialog, which -> dialog.cancel() })
                 .setOnCancelListener { dialog -> dialog.cancel() }
 

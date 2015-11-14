@@ -7,6 +7,7 @@ import android.view.MenuItem
 import com.parse.ParseUser
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity
 import happy.blumental.maxim.testproject.mvc.LoginActivity
+import happy.blumental.maxim.testproject.mvc.NetworkManager
 import happy.blumental.maxim.testproject.mvc.TodoListModelImpl
 import happy.blumental.maxim.testproject.mvc.TodoListView
 import rx.subjects.PublishSubject
@@ -25,7 +26,7 @@ public class MainActivity : RxAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        todoListView = TodoListView(findViewById(R.id.content), model, menuClicks.filter { it == R.id.action_refresh })
+        todoListView = TodoListView(this, findViewById(R.id.content), model, menuClicks.filter { it == R.id.action_refresh })
 
         if (savedInstanceState == null) {
             // load data from parse
@@ -36,7 +37,6 @@ public class MainActivity : RxAppCompatActivity() {
 
         menuClicks.filter { it == R.id.action_logout }
                 .subscribe {
-                    ParseUser.logOut()
                     val intent = Intent(this, LoginActivity::class.java)
                     startActivity(intent)
                 }
@@ -53,6 +53,7 @@ public class MainActivity : RxAppCompatActivity() {
 
         return when (id) {
             R.id.action_refresh -> {
+                NetworkManager.checkInternetConnection(this)
                 menuClicks.onNext(id)
                 true
             }

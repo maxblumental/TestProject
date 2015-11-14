@@ -1,8 +1,10 @@
 package happy.blumental.maxim.testproject.mvc
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.text.method.PasswordTransformationMethod
 import android.widget.EditText
 import android.widget.Toast
 import com.parse.ParseException
@@ -13,12 +15,20 @@ import happy.blumental.maxim.testproject.R
 
 class LoginActivity : RxAppCompatActivity() {
 
+    lateinit var loginEditText: EditText
+    lateinit var passwordEditText: EditText
+    val LOGIN_KEY = "login_key"
+    val PASSWORD_KEY = "password_key"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
-        val loginEditText = findViewById(R.id.loginEditText) as EditText
-        val passwordEditText = findViewById(R.id.passwordEditText) as EditText
+        loginEditText = findViewById(R.id.loginEditText) as EditText
+        passwordEditText = findViewById(R.id.passwordEditText) as EditText
+
+        passwordEditText.transformationMethod = PasswordTransformationMethod()
+
         val logInButton = findViewById(R.id.logInButton)
         val signUpButton = findViewById(R.id.signUpButton)
 
@@ -33,13 +43,18 @@ class LoginActivity : RxAppCompatActivity() {
             signUp(loginEditText.text.toString(),
                     passwordEditText.text.toString())
         }
+    }
 
-        if (ParseUser.getCurrentUser() != null) {
-            launchMainActivity()
-        }
+    private fun setLoginAndPassword(loginEditText: EditText, passwordEditText: EditText) {
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+
+        loginEditText.setText(sharedPref.getString(LOGIN_KEY, ""))
+        passwordEditText.setText(sharedPref.getString(PASSWORD_KEY, ""))
     }
 
     private fun signUp(login: String, pswd: String) {
+        NetworkManager.checkInternetConnection(this)
+
         val user = ParseUser();
         user.setUsername(login);
         user.setPassword(pswd);
@@ -47,6 +62,7 @@ class LoginActivity : RxAppCompatActivity() {
         user.signUpInBackground(
                 { e ->
                     if (e == null) {
+                        saveLoginAndPassword()
                         launchMainActivity()
                     } else {
                         // Sign up didn't succeed. Look at the ParseException
@@ -63,7 +79,17 @@ class LoginActivity : RxAppCompatActivity() {
                 })
     }
 
+    private fun saveLoginAndPassword() {
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        val editor = sharedPref.edit()
+        editor.putString(PASSWORD_KEY, passwordEditText.text.toString());
+        editor.putString(LOGIN_KEY, loginEditText.text.toString());
+        editor.commit();
+    }
+
     private fun logIn(login: String, pswd: String) {
+
+        NetworkManager.checkInternetConnection(this)
 
         if ( login.equals("") || pswd.equals("")) {
             showMissingCredentialsAlert()
@@ -75,6 +101,7 @@ class LoginActivity : RxAppCompatActivity() {
                 {
                     user, e ->
                     if (user != null) {
+                        saveLoginAndPassword()
                         launchMainActivity()
                     } else {
                         // Signup failed. Look at the ParseException to see what happened.
@@ -91,6 +118,7 @@ class LoginActivity : RxAppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
+
     private fun showNoSuchUserAlert() {
         val alertDialog = AlertDialog.Builder(this)
 
@@ -145,5 +173,9 @@ class LoginActivity : RxAppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        if (ParseUser.getCurrentUser() != null) {
+            setLoginAndPassword(loginEditText, passwordEditText)
+        }
     }
 }

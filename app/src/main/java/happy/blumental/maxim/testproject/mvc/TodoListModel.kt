@@ -1,7 +1,6 @@
 package happy.blumental.maxim.testproject.mvc
 
 import android.util.Log
-import android.widget.Toast
 import com.parse.ParseACL
 import com.parse.ParseQuery
 import com.parse.ParseUser
