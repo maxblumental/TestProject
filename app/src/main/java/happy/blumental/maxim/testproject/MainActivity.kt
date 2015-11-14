@@ -1,11 +1,12 @@
 package happy.blumental.maxim.testproject
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.RelativeLayout
+import com.parse.ParseUser
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity
+import happy.blumental.maxim.testproject.mvc.LoginActivity
 import happy.blumental.maxim.testproject.mvc.TodoListModelImpl
 import happy.blumental.maxim.testproject.mvc.TodoListView
 import rx.subjects.PublishSubject
@@ -33,6 +34,13 @@ public class MainActivity : RxAppCompatActivity() {
             // load data from bundle
         }
 
+        menuClicks.filter { it == R.id.action_logout }
+                .subscribe {
+                    ParseUser.logOut()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -45,6 +53,10 @@ public class MainActivity : RxAppCompatActivity() {
 
         return when (id) {
             R.id.action_refresh -> {
+                menuClicks.onNext(id)
+                true
+            }
+            R.id.action_logout -> {
                 menuClicks.onNext(id)
                 true
             }

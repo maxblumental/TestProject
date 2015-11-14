@@ -33,6 +33,10 @@ class LoginActivity : RxAppCompatActivity() {
             signUp(loginEditText.text.toString(),
                     passwordEditText.text.toString())
         }
+
+        if (ParseUser.getCurrentUser() != null) {
+            launchMainActivity()
+        }
     }
 
     private fun signUp(login: String, pswd: String) {
@@ -43,13 +47,13 @@ class LoginActivity : RxAppCompatActivity() {
         user.signUpInBackground(
                 { e ->
                     if (e == null) {
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
+                        launchMainActivity()
                     } else {
                         // Sign up didn't succeed. Look at the ParseException
                         // to figure out what went wrong
                         when (e.getCode()) {
                             ParseException.USERNAME_TAKEN -> showNameTakenAlert()
+                            ParseException.OTHER_CAUSE -> showOtherCauseAlert()
                             else -> {
                                 Toast.makeText(this, "Failed with exception ${e.getCode()}.",
                                         Toast.LENGTH_SHORT).show()
@@ -71,8 +75,7 @@ class LoginActivity : RxAppCompatActivity() {
                 {
                     user, e ->
                     if (user != null) {
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
+                        launchMainActivity()
                     } else {
                         // Signup failed. Look at the ParseException to see what happened.
                         when (e.getCode()) {
@@ -84,6 +87,10 @@ class LoginActivity : RxAppCompatActivity() {
                 })
     }
 
+    private fun launchMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+    }
     private fun showNoSuchUserAlert() {
         val alertDialog = AlertDialog.Builder(this)
 
@@ -112,7 +119,19 @@ class LoginActivity : RxAppCompatActivity() {
         val alertDialog = AlertDialog.Builder(this)
 
         alertDialog.setTitle("The login is taken")
-                .setMessage("Please, select another login.")
+                .setMessage("Please select another login.")
+                .setCancelable(true)
+                .setNegativeButton("OK", { dialog, which -> dialog.cancel() })
+                .setOnCancelListener { dialog -> dialog.cancel() }
+
+        alertDialog.create().show()
+    }
+
+    private fun showOtherCauseAlert() {
+        val alertDialog = AlertDialog.Builder(this)
+
+        alertDialog.setTitle("Something went wrong")
+                .setMessage("Make sure you provided both login and password.")
                 .setCancelable(true)
                 .setNegativeButton("OK", { dialog, which -> dialog.cancel() })
                 .setOnCancelListener { dialog -> dialog.cancel() }

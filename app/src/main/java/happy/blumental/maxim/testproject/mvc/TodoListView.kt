@@ -17,7 +17,6 @@ import happy.blumental.maxim.testproject.data.TodoItem
 import happy.blumental.maxim.testproject.mainThread
 import rx.Observable
 import rx.lang.kotlin.PublishSubject
-import rx.lang.kotlin.onError
 import java.util.*
 import java.util.concurrent.TimeUnit
 
