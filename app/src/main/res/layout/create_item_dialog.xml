@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/dialogEditText"
         android:hint="New task name"
-        android:layout_alignParentEnd="false" />
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="false"/>
 
 </RelativeLayout>

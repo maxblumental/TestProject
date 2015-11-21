@@ -92,7 +92,7 @@ class TodoListModelImpl() : TodoListModel {
                 }
                 .subscribe {
                     items.remove(it.todoItem)
-                    parseItems.get(it.todoItem.id)?.delete()
+                    parseItems[it.todoItem.id]?.delete()
                     parseItems.remove(it.todoItem.id)
                     updateUISubject.onNext(it)
                 }
@@ -100,7 +100,7 @@ class TodoListModelImpl() : TodoListModel {
         subscription += view.itemClicksSubject
                 .withScheduler()
                 .map {
-                    val parseItem = parseItems.get(it.id)
+                    val parseItem = parseItems[it.id]
                     if (parseItem != null) {
                         parseItem.isDone = it.checked
                         parseItem.saveInBackground()

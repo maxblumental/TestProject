@@ -56,7 +56,7 @@ class LoginActivity : RxAppCompatActivity() {
         NetworkManager.checkInternetConnection(this)
 
         val user = ParseUser();
-        user.setUsername(login);
+        user.username = login;
         user.setPassword(pswd);
 
         user.signUpInBackground(
@@ -67,11 +67,11 @@ class LoginActivity : RxAppCompatActivity() {
                     } else {
                         // Sign up didn't succeed. Look at the ParseException
                         // to figure out what went wrong
-                        when (e.getCode()) {
+                        when (e.code) {
                             ParseException.USERNAME_TAKEN -> showNameTakenAlert()
                             ParseException.OTHER_CAUSE -> showOtherCauseAlert()
                             else -> {
-                                Toast.makeText(this, "Failed with exception ${e.getCode()}.",
+                                Toast.makeText(this, "Failed with exception ${e.code}.",
                                         Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -105,9 +105,9 @@ class LoginActivity : RxAppCompatActivity() {
                         launchMainActivity()
                     } else {
                         // Signup failed. Look at the ParseException to see what happened.
-                        when (e.getCode()) {
+                        when (e.code) {
                             ParseException.OBJECT_NOT_FOUND -> showNoSuchUserAlert()
-                            else -> Toast.makeText(this, "Failed with exception ${e.getCode()}.",
+                            else -> Toast.makeText(this, "Failed with exception ${e.code}.",
                                     Toast.LENGTH_SHORT).show()
                         }
                     }

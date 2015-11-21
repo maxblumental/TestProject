@@ -2,10 +2,8 @@ package happy.blumental.maxim.testproject
 
 import android.view.View
 import android.view.ViewGroup
-import com.parse.ParseObject
 import com.trello.rxlifecycle.RxLifecycle
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity
-import happy.blumental.maxim.testproject.data.PTodoItem
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers

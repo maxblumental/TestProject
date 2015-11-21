@@ -66,7 +66,7 @@ class TodoListView(val activity: Activity, val layout: View, model: TodoListMode
     private fun updateUI(event: Event) {
         // check delete
         if (event.status == Event.Status.DELETE) {
-            itemsView.removeView(itemToView.get(event.todoItem))
+            itemsView.removeView(itemToView[event.todoItem])
             itemToView.remove(event.todoItem)
             return
         }
